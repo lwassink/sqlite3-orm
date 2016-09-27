@@ -1,18 +1,10 @@
 require_relative 'questions_db.rb'
 
-class Question
+class Question < Table
   attr_accessor :id, :title, :body, :author_id
 
-  def self.find_by_id(id)
-    data = QuestionsDatabase.instance.execute(<<-SQL, id)
-      SELECT
-        *
-      FROM
-        questions
-      WHERE
-        id = ?
-    SQL
-    Question.new(data.first)
+  def self.table_name
+    'questions'
   end
 
   def self.find_by_author_id(author_id)
@@ -29,6 +21,10 @@ class Question
 
   def self.most_followed(n)
     QuestionFollow.most_followed_questions(n)
+  end
+
+  def self.most_liked(n)
+    Like.most_liked_questions(n)
   end
 
   def initialize(options)
@@ -55,4 +51,9 @@ class Question
   def likers
     Like.likers_for_question_id(@id)
   end
+
+  def num_likes
+    Like.num_likes_for_question_id(@id)
+  end
+
 end

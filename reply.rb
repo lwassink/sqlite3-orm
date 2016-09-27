@@ -1,18 +1,10 @@
 require_relative 'questions_db.rb'
 
-class Reply
+class Reply < Table
   attr_accessor :id, :subject_question_id, :author_id, :body, :parent_reply_id
 
-  def self.find_by_id(id)
-    data = QuestionsDatabase.instance.execute(<<-SQL, id)
-      SELECT
-        *
-      FROM
-        replies
-      WHERE
-        id = ?
-    SQL
-    Reply.new(data.first)
+  def self.table_name
+    'replies'
   end
 
   def self.find_by_user_id(user_id)

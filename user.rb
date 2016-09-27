@@ -1,18 +1,11 @@
 require_relative 'questions_db.rb'
+require_relative 'table'
 
-class User
+class User < Table
   attr_accessor :id, :fname, :lname
 
-  def self.find_by_id(id)
-    data = QuestionsDatabase.instance.execute(<<-SQL, id)
-      SELECT
-        *
-      FROM
-        users
-      WHERE
-        id = ?
-    SQL
-    User.new(data.first)
+  def self.table_name
+    'users'
   end
 
   def self.find_by_name(fname, lname)
@@ -45,5 +38,33 @@ class User
 
   def followed_questions
     QuestionFollow.followed_questions_for_user_id(@id)
+  end
+
+  def liked_questions
+    Like.liked_questions_for_user_id(@id)
+  end
+
+  def average_karma
+    data = QuestionsDatabase.instance.execute(<<-SQL, @id, @id)
+      SELECT
+        tc.total_questions / CAST(tl.total_likes AS FLOAT) AS karma
+      FROM
+        (
+          SELECT
+            COUNT(*) AS total_questions
+          FROM
+            questions
+          WHERE
+            questions.author_id = ?) AS tc JOIN
+        (
+          SELECT
+            COUNT(*) AS total_likes
+          FROM
+            likes JOIN questions
+            ON likes.question_id = questions.id
+          WHERE
+            questions.id = ?) AS tl
+    SQL
+    data.first['karma'] || 0
   end
 end

@@ -1,18 +1,10 @@
 require_relative 'questions_db.rb'
 
-class QuestionFollow
+class QuestionFollow < Table
   attr_accessor :question_id, :user_id
 
-  def self.find_by_id(question_id, user_id)
-    data = QuestionsDatabase.instance.execute(<<-SQL, question_id, user_id)
-      SELECT
-        *
-      FROM
-        question_follows
-      WHERE
-        question_id = ? AND user_id = ?
-    SQL
-    QuestionFollow.new(data.first)
+  def self.table_name
+    'question_follows'
   end
 
   def self.followers_by_question_id(question_id)
@@ -43,7 +35,7 @@ class QuestionFollow
 
   def self.most_followed_questions(n)
     return [] if n <= 0
-    
+
     data = QuestionsDatabase.instance.execute(<<-SQL, n)
       SELECT
         questions.id, questions.title, questions.body, questions.author_id

@@ -1,18 +1,10 @@
 require_relative 'questions_db.rb'
 
-class Like
+class Like < Table
   attr_accessor :user_id, :question_id
 
-  def self.find_by_id(question_id, user_id)
-    data = QuestionsDatabase.instance.execute(<<-SQL, user_id, question_id)
-      SELECT
-        *
-      FROM
-        likes
-      WHERE
-        user_id = ? AND question_id = ?
-    SQL
-    Like.new(data.first)
+  def self.table_name
+    'likes'
   end
 
   def self.likers_for_question_id(question_id)
@@ -49,6 +41,22 @@ class Like
           ON q.id = likes.question_id
       WHERE
         likes.user_id = ?
+    SQL
+    data.map { |datum| Question.new(datum) }
+  end
+
+  def self.most_liked_questions(n)
+    return [] if n <= 0
+
+    data = QuestionsDatabase.instance.execute(<<-SQL, n)
+      SELECT
+        questions.id, questions.title, questions.body, questions.author_id
+      FROM
+        questions JOIN likes
+          ON questions.id = likes.question_id
+      GROUP BY questions.id
+      ORDER BY COUNT(DISTINCT likes.user_id) DESC
+      LIMIT ?
     SQL
     data.map { |datum| Question.new(datum) }
   end
