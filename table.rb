@@ -26,7 +26,7 @@ class Table
   def self.where(options)
     options = options.map do |key, val|
       "#{key} = " + (val.is_a?(String) ? "'#{val}'" : "#{val}")
-    end.to_a.join(', ')
+    end.to_a.join(' AND ')
     data = QuestionsDatabase.instance.execute(<<-SQL)
       SELECT
         *
@@ -36,6 +36,22 @@ class Table
         #{options}
     SQL
     data.map { |datum| self.new(datum) }
+  end
+
+  def self.method_missing(method_name, *args)
+    return unless method_name.to_s.start_with?('find_by_')
+
+    keys = method_name.to_s[8..-1]
+    keys = keys.split("_and_")
+    raise ArgumentError unless keys.length == args.length
+
+    options = {}
+    args.each_with_index do |arg, i|
+      options[keys[i]] = arg
+    end
+    p options
+
+    self.where(options)
   end
 
   def save
