@@ -7,18 +7,6 @@ class Question < Table
     'questions'
   end
 
-  def self.find_by_author_id(author_id)
-    data = QuestionsDatabase.instance.execute(<<-SQL, author_id)
-      SELECT
-        *
-      FROM
-        questions
-      WHERE
-        author_id = ?
-    SQL
-    data.map { |datum| Question.new(datum) }
-  end
-
   def self.most_followed(n)
     QuestionFollow.most_followed_questions(n)
   end

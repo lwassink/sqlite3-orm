@@ -7,30 +7,6 @@ class Reply < Table
     'replies'
   end
 
-  def self.find_by_user_id(user_id)
-    data = QuestionsDatabase.instance.execute(<<-SQL, user_id)
-      SELECT
-        *
-      FROM
-        replies
-      WHERE
-        author_id = ?
-    SQL
-    data.map { |datum| Question.new(datum) }
-  end
-
-  def self.find_by_question_id(question_id)
-    data = QuestionsDatabase.instance.execute(<<-SQL, question_id)
-      SELECT
-        *
-      FROM
-        replies
-      WHERE
-        subject_question_id = ?
-    SQL
-    data.map { |datum| Reply.new(datum) }
-  end
-
   def initialize(options)
     return nil if options.nil?
 

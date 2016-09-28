@@ -24,9 +24,10 @@ class Table
   end
 
   def self.where(options)
-    options = options.map do |key, val|
-      "#{key} = " + (val.is_a?(String) ? "'#{val}'" : "#{val}")
-    end.to_a.join(' AND ')
+    if options.is_a?(Hash)
+      options = self.parse_options(options)
+    end
+
     data = QuestionsDatabase.instance.execute(<<-SQL)
       SELECT
         *
@@ -73,6 +74,14 @@ class Table
       SQL
       @id = QuestionsDatabase.instance.last_insert_row_id
     end
+  end
+
+  private
+
+  def self.parse_options(options)
+    options.map do |key, val|
+      "#{key} = " + (val.is_a?(String) ? "'#{val}'" : "#{val}")
+    end.to_a.join(' AND ')
   end
 
   def sanitized_variables

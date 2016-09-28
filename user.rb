@@ -8,18 +8,6 @@ class User < Table
     'users'
   end
 
-  def self.find_by_name(fname, lname)
-    data = QuestionsDatabase.instance.execute(<<-SQL, fname, lname)
-      SELECT
-        *
-      FROM
-        users
-      WHERE
-        fname = ? AND lname = ?
-    SQL
-    data.map { |datum| User.new(datum) }
-  end
-
   def initialize(options)
     return nil if options.nil?
 
